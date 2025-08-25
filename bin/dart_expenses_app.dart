@@ -133,7 +133,44 @@ void main() async {
 
        
         // ---------------- Add new expense ----------------
-        
+        } else if (choice == '4') {
+          final addUrl = Uri.parse(
+            'http://localhost:3000/expenses/add/$userId',
+          );
+          print("===== Add new item =====");
+          stdout.write("Item: ");
+          String? item = stdin.readLineSync()?.trim();
+          stdout.write("Paid: ");
+          String? paid = stdin.readLineSync()?.trim();
+
+          if (item == null || item.isEmpty || paid == null || paid.isEmpty) {
+            print("Invalid input\n");
+            continue;
+          }
+
+          final paidAmount = int.tryParse(paid);
+          if (paidAmount == null) {
+            print("Please input a number\n");
+            continue;
+          }
+
+          final addBody = jsonEncode({
+            "user_id": userId,
+            "item": item,
+            "paid": paidAmount,
+          });
+
+          final addResponse = await http.post(
+            addUrl,
+            headers: {"Content-Type": "application/json"},
+            body: addBody,
+          );
+
+          if (addResponse.statusCode == 201) {
+            print("Inserted!\n");
+          } else {
+            print("Failed to add expense. Error: ${addResponse.statusCode}\n");
+          }
 
         // ---------------- Delete expense ----------------
 } else if (choice == '5') {
