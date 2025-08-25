@@ -101,7 +101,36 @@ void main() async {
           }
 
        //---------------search expenses----------------
-       
+               } else if (choice == '3') {
+          stdout.write("Item to search: ");
+          String? keyword = stdin.readLineSync()?.trim();
+
+          if (keyword == null || keyword.isEmpty) {
+            print("No keyword entered.");
+            continue;
+          }
+
+          final searchUrl = Uri.parse(
+            'http://localhost:3000/expenses/$userId/search?query=${Uri.encodeComponent(keyword)}',
+          );
+
+          final response = await http.get(searchUrl);
+
+          if (response.statusCode == 200) {
+            final jsonResult = json.decode(response.body) as List<dynamic>;
+            if (jsonResult.isEmpty) {
+              print("No expenses matched your search '$keyword'.");
+            } else {
+              for (var exp in jsonResult) {
+                final dt = DateTime.tryParse(exp['date'].toString());
+                final dtLocal = dt?.toLocal().toString().split(".")[0]; // remove milliseconds
+                print("${exp['id']}. ${exp['item']} : ${exp['paid']}฿ : ${dtLocal ?? exp['date']}");
+              }
+            }
+          } else {
+            print("Search failed (${response.statusCode})");
+          }
+
        
         // ---------------- Add new expense ----------------
         
