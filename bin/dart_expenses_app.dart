@@ -101,17 +101,75 @@ void main() async {
           }
 
        //---------------search expenses----------------
-       
+               } else if (choice == '3') {
+          stdout.write("Item to search: ");
+          String? keyword = stdin.readLineSync()?.trim();
+
+          if (keyword == null || keyword.isEmpty) {
+            print("No keyword entered.");
+            continue;
+          }
+
+          final searchUrl = Uri.parse(
+            'http://localhost:3000/expenses/$userId/search?query=${Uri.encodeComponent(keyword)}',
+          );
+
+          final response = await http.get(searchUrl);
+
+          if (response.statusCode == 200) {
+            final jsonResult = json.decode(response.body) as List<dynamic>;
+            if (jsonResult.isEmpty) {
+              print("No expenses matched your search '$keyword'.");
+            } else {
+              for (var exp in jsonResult) {
+                final dt = DateTime.tryParse(exp['date'].toString());
+                final dtLocal = dt?.toLocal().toString().split(".")[0]; // remove milliseconds
+                print("${exp['id']}. ${exp['item']} : ${exp['paid']}฿ : ${dtLocal ?? exp['date']}");
+              }
+            }
+          } else {
+            print("Search failed (${response.statusCode})");
+          }
+
        
         // ---------------- Add new expense ----------------
         
 
         // ---------------- Delete expense ----------------
+} else if (choice == '5') {
+  print("===== Delete an item =====");
+  stdout.write("Enter expense ID to delete: ");
+  String? idStr = stdin.readLineSync()?.trim();
 
+  if (idStr == null || idStr.isEmpty) {
+    print("Invalid input\n");
+    continue;
+  }
+
+  final id = int.tryParse(idStr);
+  if (id == null) {
+    print("Please input a number\n");
+    continue;
+  }
+
+  // ส่ง id ผ่าน URL แทน body
+  final deleteUrl = Uri.parse('http://localhost:3000/expenses/$id');
+  final deleteResponse = await http.delete(
+    deleteUrl,
+    headers: {"Content-Type": "application/json"},
+  );
+
+  if (deleteResponse.statusCode == 200) {
+    print("Expense with ID $id deleted successfully!\n");
+  } else if (deleteResponse.statusCode == 404) {
+    print("Expense with ID $id not found.\n");
+  } else {
+    print("Failed to delete expense. Error: ${deleteResponse.statusCode}\n");
+  }
 
 
         // ---------------- Exit ----------------
-        } else if (choice == '5') {
+        } else if (choice == '6') {
           print("-----Bye--------");
           break;
         } else {
