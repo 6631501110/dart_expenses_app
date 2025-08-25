@@ -107,11 +107,40 @@ void main() async {
         
 
         // ---------------- Delete expense ----------------
+} else if (choice == '5') {
+  print("===== Delete an item =====");
+  stdout.write("Enter expense ID to delete: ");
+  String? idStr = stdin.readLineSync()?.trim();
 
+  if (idStr == null || idStr.isEmpty) {
+    print("Invalid input\n");
+    continue;
+  }
+
+  final id = int.tryParse(idStr);
+  if (id == null) {
+    print("Please input a number\n");
+    continue;
+  }
+
+  // ส่ง id ผ่าน URL แทน body
+  final deleteUrl = Uri.parse('http://localhost:3000/expenses/$id');
+  final deleteResponse = await http.delete(
+    deleteUrl,
+    headers: {"Content-Type": "application/json"},
+  );
+
+  if (deleteResponse.statusCode == 200) {
+    print("Expense with ID $id deleted successfully!\n");
+  } else if (deleteResponse.statusCode == 404) {
+    print("Expense with ID $id not found.\n");
+  } else {
+    print("Failed to delete expense. Error: ${deleteResponse.statusCode}\n");
+  }
 
 
         // ---------------- Exit ----------------
-        } else if (choice == '5') {
+        } else if (choice == '6') {
           print("-----Bye--------");
           break;
         } else {
