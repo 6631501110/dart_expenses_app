@@ -58,8 +58,7 @@ void main() async {
           final response = await http.get(allExpensesUrl);
 
           if (response.statusCode == 200) {
-            final jsonResult =
-                json.decode(response.body) as List<dynamic>;
+            final jsonResult = json.decode(response.body) as List<dynamic>;
             int total = 0;
             print("-------------All Expenses---------");
             for (var exp in jsonResult) {
@@ -75,7 +74,7 @@ void main() async {
             print("Failed to fetch all expenses");
           }
 
-        // ---------------- Today's expenses ----------------
+          // ---------------- Today's expenses ----------------
         } else if (choice == '2') {
           final todayExpensesUrl = Uri.parse(
             'http://localhost:3000/expenses/$userId/today',
@@ -83,8 +82,7 @@ void main() async {
           final response = await http.get(todayExpensesUrl);
 
           if (response.statusCode == 200) {
-            final jsonResult =
-                json.decode(response.body) as List<dynamic>;
+            final jsonResult = json.decode(response.body) as List<dynamic>;
             int total = 0;
             print("------------Today's Expenses-----------");
             for (var exp in jsonResult) {
@@ -100,18 +98,47 @@ void main() async {
             print("Failed to fetch today's expenses");
           }
 
-       //---------------search expenses----------------
-       
-       
-        // ---------------- Add new expense ----------------
-        
+          //---------------search expenses----------------
+        } else if (choice == '3') {
+          stdout.write("Item to search: ");
+          String? keyword = stdin.readLineSync()?.trim();
 
-        // ---------------- Delete expense ----------------
+          if (keyword == null || keyword.isEmpty) {
+            print("No keyword entered.");
+            continue;
+          }
 
+          final searchUrl = Uri.parse(
+            'http://localhost:3000/expenses/$userId/search?query=${Uri.encodeComponent(keyword)}',
+          );
 
+          final response = await http.get(searchUrl);
 
-        // ---------------- Exit ----------------
-        } else if (choice == '5') {
+          if (response.statusCode == 200) {
+            final jsonResult = json.decode(response.body) as List<dynamic>;
+            if (jsonResult.isEmpty) {
+              print("No expenses matched your search '$keyword'.");
+            } else {
+              for (var exp in jsonResult) {
+                final dt = DateTime.tryParse(exp['date'].toString());
+                final dtLocal = dt?.toLocal().toString().split(
+                  ".",
+                )[0]; // remove milliseconds
+                print(
+                  "${exp['id']}. ${exp['item']} : ${exp['paid']}฿ : ${dtLocal ?? exp['date']}",
+                );
+              }
+            }
+          } else {
+            print("Search failed (${response.statusCode})");
+          }
+
+          // ---------------- Add new expense ----------------
+
+          // ---------------- Delete expense ----------------
+
+          // ---------------- Exit ----------------
+        } else if (choice == '6') {
           print("-----Bye--------");
           break;
         } else {
